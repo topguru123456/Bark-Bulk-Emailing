@@ -18,76 +18,119 @@ export type AccountTemplate = {
 /** Account id → default compose content (see .env.local account order). */
 export const TEMPLATES_BY_ACCOUNT_ID: Record<string, AccountTemplate> = {
   "1": {
-    defaultSubject: "{Clientname} — Bark request review",
-    defaultBody: `Dear {Clientname},
+    defaultSubject: "Proposal for Bark Project Services",
+    defaultBody: `Hi, {Clientname}
 
-I am a licensed Professional Engineer and saw your Bark request.
+I hope this message finds you well.
 
-I can help prepare a permit-ready package for your project, including architectural drawings and engineering coordination where the city requires it. My focus is to make the set complete enough for submission, not just attractive on paper.
+We are pleased to submit our proposal for providing architectural and engineering services, including full permit drawing packages for city submission and approval within the United States.
 
-If you can share the project address, scope, and any city comments you already have, I can review the likely requirements and outline the next step.
+Our team specializes in preparing code-compliant construction documents tailored to local jurisdiction requirements, ensuring smooth permit processing and reduced revision cycles.
 
-Respectfully,
+Scope of Services:
+- Architectural permit drawings
+- Engineering coordination (structural / MEP as required)
+- Code compliance review
+- City submission support
+
+We would be glad to discuss your project in detail and tailor our services to your specific requirements.
+
+Thank you for considering our proposal.
+
+Kind regards,
 David`,
   },
   "2": {
-    defaultSubject: "Licensed P.E. for your Bark request",
-    defaultBody: `Hello {Clientname},
+    defaultSubject: "Let's Support Your Bark Project",
+    defaultBody: `Hello, {Clientname}
 
-I am a licensed Professional Engineer and saw your Bark request.
+I hope you're doing well.
 
-If you are still comparing options, I can help you identify what drawings or engineering items the city will expect before you spend time on the wrong package. I keep the process practical: review the scope, confirm the permit path, then prepare what is needed.
+We help design professionals and contractors prepare architectural and engineering drawings for city permits across the U.S.
 
-Reply with the project type and city, and I can tell you what I would check first.
+If you're currently working on a project that needs permit submission support, we can help prepare a complete and compliant drawing set.
 
-Daniel`,
+We are flexible and easy to coordinate with, and can adapt to your project workflow and timeline.
+
+Let me know if you'd like to connect.
+
+Best, Daniel`,
   },
   "3": {
-    defaultSubject: "Bark permit drawing review",
-    defaultBody: `Hello {Clientname},
+    defaultSubject: "Job Request on Bark",
+    defaultBody: `Hello, {Clientname}
 
-I am a licensed Professional Engineer and reviewed your Bark request.
+Hope you are doing well.
 
-For permit work, the weak point is usually not one drawing; it is coordination between the architectural sheets, code notes, and engineering requirements. I can prepare or review the package so the submittal is technically consistent before it reaches plan check.
+I am writing to express my interest in your project on bark.com and to formally submit my proposal for architectural and engineering permit drawing services.
 
-If you send the scope and jurisdiction, I can respond with the drawing list I would expect for approval.
+I specialize in preparing code-compliant permit drawing packages for city approvals across the United States, ensuring accuracy, compliance, and smooth permitting processes.
+
+What I Provide:
+- Full architectural permit drawing sets
+- Structural coordination (as required)
+- Code compliance review (IBC / local amendments)
+- City submission-ready documentation
+- Revisions based on reviewer comments (if needed)
+
+My Working Approach:
+I begin by carefully reviewing your project requirements and jurisdiction standards. Then I develop a coordinated drawing set that aligns with both design intent and permitting regulations. Before submission, I perform a compliance check to reduce revision cycles and improve approval speed.
+
+I would be glad to support your project and deliver a complete permit-ready package efficiently and professionally.
 
 Kind regards,
 James`,
   },
   "4": {
-    defaultSubject: "Plan-check help for your Bark request",
-    defaultBody: `Hi {Clientname},
+    defaultSubject: "Get Faster City Permit Approval for your Bark Project",
+    defaultBody: `Hello, {Clientname}
 
-I am a licensed Professional Engineer and saw your Bark request.
+I have reviewed the work request you posted to bark.com.
 
-My work is centered on permit approval: drawings that answer the city's review points, code notes that match the project, and engineering coordination before submittal. That usually saves more time than trying to fix a rejected set later.
+Getting city permits approved can be time-consuming and complex, especially when drawings do not fully meet jurisdiction requirements.
 
-If timing is important, send the project location and a short description. I can let you know what may slow the permit down.
+We help architects, developers, and contractors by preparing accurate and code-compliant permit drawing packages that reduce delays and revision cycles.
 
+Our services include:
+- Architectural permit drawings
+- Engineering coordination
+- Code compliance verification
+- City submittal-ready documents
+
+Our goal is to help you move from design to approval faster and with fewer revisions.
+
+Please let us know if you would like to review our sample work.
+
+Sincerely,
 Michael`,
   },
   "5": {
-    defaultSubject: "Stamped drawings for Bark request",
-    defaultBody: `Hi {Clientname},
+    defaultSubject: "Permit Drawing Services for Your Bark Project",
+    defaultBody: `Hello, {Clientname}
+How are you?
 
-I am a licensed Professional Engineer and saw your Bark request.
+We provide architectural and engineering permit drawing services for city approvals across the United States.
 
-If the job needs stamped drawings or a clean permit set, I can help turn the scope into documents the city can actually review. I prefer to start with the practical items: location, work type, existing conditions, and whether structural changes are involved.
+Our deliverables include complete drawing sets prepared according to local building codes and submission requirements, ready for permit filing.
 
-Send those details if you have them, and I can confirm whether I am a fit.
+If you are currently working on a project that requires stamped or permit-ready drawings, we would be happy to assist.
 
+Looking forward to your response.
+
+Best regards,
 Joseph`,
   },
   "6": {
-    defaultSubject: "P.E. review for your Bark request",
+    defaultSubject: "Licensed P.E. Services for Your Bark Project",
     defaultBody: `Dear {Clientname},
 
-I am a licensed Professional Engineer and came across your Bark request.
+I hope you are doing well.
 
-I can assist with engineering review, structural calculations, and stamped documentation when your jurisdiction requires professional sign-off. If architectural sheets are already being prepared, I can coordinate with them; if not, I can advise what engineering information should be included.
+I came across your project on Bark and would be pleased to assist you. As a licensed Professional Engineer (P.E.), I can provide the expertise needed to successfully complete your project.
 
-Please reply with the project location and the type of work, and I can tell you what P.E. involvement is likely needed.
+I look forward to learning more about your requirements and discussing how I can best support your project.
+
+Thank you for your time and consideration. I look forward to hearing from you.
 
 Sincerely,
 Robert, P.E.`,

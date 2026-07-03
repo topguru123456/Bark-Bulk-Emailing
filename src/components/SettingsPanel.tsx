@@ -147,9 +147,9 @@ export function SettingsPanel({ settings, onSaved }: Props) {
             day, then increase slowly. Sudden volume spikes hurt trust.
           </li>
           <li>
-            <strong>Approved copy matters most</strong> — each default email now
-            starts from the licensed P.E. + Bark request context, then changes
-            the service angle by account. Avoid generic sales hooks.
+            <strong>Approved copy matters most</strong> — defaults stay close to
+            your proven Bark project wording. Avoid adding emojis, fake reply
+            prefixes, or aggressive sales hooks.
           </li>
           <li>
             <strong>Duplicate warning</strong> — the app only warns when the
