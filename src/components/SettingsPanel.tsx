@@ -83,6 +83,21 @@ export function SettingsPanel({ settings, onSaved }: Props) {
 
       <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-zinc-950">
         <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
+          Vercel storage
+        </p>
+        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          History, templates, and settings need persistent storage on Vercel.
+        </p>
+        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
+          In your Vercel project go to{" "}
+          <span className="font-medium">Storage → Blob → Create</span>, then
+          redeploy. Vercel adds{" "}
+          <code className="text-xs">BLOB_READ_WRITE_TOKEN</code> automatically.
+        </p>
+      </div>
+
+      <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-zinc-950">
+        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
           Timezone
         </p>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
