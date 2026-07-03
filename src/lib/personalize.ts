@@ -46,76 +46,73 @@ type SubjectParts = { name: string; sender: string; pick: (slot: number, n: numb
 type SubjectRecipe = (parts: SubjectParts) => string;
 
 /**
- * Human subject lines — short, varied, no "Name, support for your Bark project" mail-merge feel.
- * Built from recipes per sender voice; same client always gets the same line.
+ * Subject lines — unique vocabulary per account so 6 sends to one client
+ * don't produce duplicate "Hi Joana" / "Quick note" subjects.
  */
 const SUBJECT_RECIPES_BY_ACCOUNT: Record<string, SubjectRecipe[]> = {
   "1": [
-    ({ name }) => `Hi ${name}`,
-    ({ name }) => `${name} — permit drawings`,
-    () => `Permit drawing proposal`,
-    () => `Architectural plans for city approval`,
-    ({ name }) => `Quick note — ${name}`,
-    () => `Proposal for your project`,
-    ({ sender }) => `Permit package — ${sender}`,
-    ({ name }) => `Following your listing — ${name}`,
+    () => `Architectural proposal`,
+    ({ name }) => `Drawing package for ${name}`,
+    () => `City submission scope`,
+    ({ name }) => `${name} — permit drawing proposal`,
+    () => `Full permit package`,
+    ({ sender }) => `Proposal — ${sender}`,
+    () => `Code-compliant drawing set`,
+    ({ name }) => `Scope for ${name}'s project`,
   ],
   "2": [
-    ({ name }) => `Hi ${name}`,
-    ({ name }) => `${name} — permit help`,
-    () => `Permit drawings`,
-    () => `Quick note`,
-    () => `Drawings for city approval`,
-    ({ name }) => `Saw your listing — ${name}`,
-    ({ sender }) => `${sender} — permit support`,
-    () => `Your project request`,
-    ({ name }) => `${name} — quick question`,
+    ({ name }) => `Hey ${name}`,
+    () => `Can you use an extra hand on drawings?`,
+    () => `Permit set question`,
+    ({ name }) => `${name} — quick one`,
+    () => `Thought I'd reach out`,
+    () => `City permit help`,
+    ({ name }) => `Drawings for ${name}`,
+    () => `Flexible on timeline`,
   ],
   "3": [
-    ({ name }) => `Hi ${name}`,
-    ({ name }) => `${name} — permit drawings`,
-    () => `Permit-ready drawings`,
-    () => `Architectural plans`,
+    () => `Interest in your posted work`,
+    ({ name }) => `${name} — permit scope`,
+    () => `Submission-ready drawings`,
+    () => `Formal proposal — permit drawings`,
     ({ name }) => `Your listing — ${name}`,
-    () => `City permit proposal`,
-    ({ sender }) => `Drawings — ${sender}`,
-    ({ name }) => `Quick note for ${name}`,
+    () => `IBC-compliant drawing set`,
+    ({ sender }) => `${sender} — permit proposal`,
+    () => `Review & compliance package`,
   ],
   "4": [
-    ({ name }) => `Hi ${name}`,
-    () => `Faster city permit approval`,
-    ({ name }) => `${name} — permit drawings`,
-    () => `Permit submittal help`,
-    () => `Quick note`,
-    ({ name }) => `Your work request — ${name}`,
-    () => `Code-compliant drawing set`,
-    ({ sender }) => `Permit help — ${sender}`,
+    () => `Shorter permit review cycles`,
+    ({ name }) => `${name} — approval timeline`,
+    () => `Reducing plan-check revisions`,
+    () => `Submittal-ready documents`,
+    ({ name }) => `Permit path for ${name}`,
+    () => `Sample work available`,
+    ({ sender }) => `Permit support — ${sender}`,
+    () => `From design to approval`,
   ],
   "5": [
-    ({ name }) => `Hi ${name}`,
-    ({ name }) => `${name} — stamped drawings`,
-    () => `Permit drawing services`,
-    () => `Quick note`,
-    () => `Drawings for city filing`,
-    ({ name }) => `Following up — ${name}`,
-    ({ sender }) => `${sender} — permit drawings`,
-    () => `Your project`,
+    () => `Stamped drawings`,
+    ({ name }) => `${name}`,
+    () => `Ready for city filing`,
+    () => `Permit docs`,
+    ({ name }) => `Drawings — ${name}`,
+    () => `Need stamped set?`,
+    () => `Building code filing set`,
+    ({ name }) => `about your listing`,
   ],
   "6": [
-    ({ name }) => `Hi ${name}`,
-    ({ name }) => `${name} — engineering review`,
-    () => `Licensed P.E. services`,
-    () => `Quick note`,
-    ({ name }) => `Your project — ${name}`,
-    () => `Structural / permit support`,
+    () => `P.E. review & stamp`,
+    ({ name }) => `${name} — structural sign-off`,
+    () => `Licensed engineer availability`,
+    () => `Engineering calculations`,
+    ({ name }) => `Your build — ${name}`,
     ({ sender }) => `${sender}, P.E.`,
-    () => `Engineering for your build`,
+    () => `Professional engineer services`,
+    () => `Calc package & stamp`,
   ],
 };
 
 const FALLBACK_RECIPES: SubjectRecipe[] = [
-  ({ name }) => `Hi ${name}`,
-  () => `Quick note`,
   ({ name }) => `${name} — permit drawings`,
   () => `Following your listing`,
 ];
@@ -139,10 +136,10 @@ export function sanitizeSubject(subject: string): string {
   s = s.replace(/([\u{1F300}-\u{1FAFF}\u2600-\u27BF])\1{2,}/gu, "$1");
   s = s.replace(/^[\s\u{1F300}-\u{1FAFF}\u2600-\u27BF]+/gu, "").trim();
   s = s.replace(/[\s\u{1F300}-\u{1FAFF}\u2600-\u27BF]+$/gu, "").trim();
-  if (/^re:\s*/i.test(s) && !s.toLowerCase().includes("fwd:")) {
+  // Strip fake Re: prefixes
+  if (/^re:\s*/i.test(s)) {
     s = s.replace(/^re:\s*/i, "").trim();
   }
-  // "Name, something" reads like mail merge — prefer em dash when we control the format
   s = s.replace(/^([A-Z][a-z]+),\s+(?=[a-z])/u, "$1 — ");
   return s;
 }

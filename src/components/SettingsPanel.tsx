@@ -147,18 +147,16 @@ export function SettingsPanel({ settings, onSaved }: Props) {
             day, then increase slowly. Sudden volume spikes hurt trust.
           </li>
           <li>
-            <strong>Natural subjects</strong> — defaults use short lines like
-            &quot;Hi Joana&quot; or &quot;Permit drawings&quot;, not
-            &quot;Joana, support for your Bark project&quot;. Avoid repeating
-            &quot;Bark&quot; in every subject.
+            <strong>One account per client — seriously</strong> — if Joana gets
+            six similar emails from six Gmail addresses, she will know. The app
+            warns when another sender already contacted the same client. Each
+            account has a different voice, font, and subject vocabulary by
+            design.
           </li>
           <li>
-            <strong>First name only</strong> — enter just the client&apos;s first
-            name; use <code>{"{Clientname}"}</code> in templates.
-          </li>
-          <li>
-            <strong>One account per client</strong> — don&apos;t send the same
-            client from all 6 accounts.
+            <strong>Distinct senders</strong> — David writes formal proposals,
+            Daniel is brief and casual, Robert is P.E.-only engineering. They
+            should not feel interchangeable.
           </li>
           <li>
             <strong>Ask recipients to reply</strong> — a reply strongly signals
@@ -182,9 +180,9 @@ export function SettingsPanel({ settings, onSaved }: Props) {
           </li>
         </ul>
         <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
-          The app uses STARTTLS on port 587, plain-text + minimal HTML, Reply-To,
-          no X-Mailer header, subject sanitization (emoji / fake Re:), and
-          per-client subject rotation for default templates.
+          Each account uses its own HTML font/layout, subject vocabulary, greeting
+          style, and body structure. Reset templates to pick up the latest
+          defaults.
         </p>
       </div>
 

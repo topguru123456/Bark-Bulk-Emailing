@@ -1,5 +1,9 @@
 import { NextResponse } from "next/server";
-import { findRecentSend, getHistoryEntries } from "@/lib/history";
+import {
+  findRecentSend,
+  findSendsFromOtherAccounts,
+  getHistoryEntries,
+} from "@/lib/history";
 import { getSettings } from "@/lib/settings";
 import { formatTimeAgo } from "@/lib/datetime";
 
@@ -28,20 +32,25 @@ export async function POST(request: Request) {
 
   const settings = await getSettings();
   const entries = await getHistoryEntries();
-  const recent = findRecentSend(
+  const windowDays = settings.duplicateWarningDays;
+
+  const recent = findRecentSend(entries, accountId, clientEmail, windowDays);
+  const otherSends = findSendsFromOtherAccounts(
     entries,
     accountId,
     clientEmail,
-    settings.duplicateWarningDays,
+    windowDays,
   );
 
-  if (!recent) {
-    return NextResponse.json({ shouldWarn: false });
-  }
-
   return NextResponse.json({
-    shouldWarn: true,
-    lastSend: recent,
-    timeAgo: formatTimeAgo(recent.sentAt),
+    shouldWarn: Boolean(recent),
+    lastSend: recent ?? undefined,
+    timeAgo: recent ? formatTimeAgo(recent.sentAt) : undefined,
+    crossAccountWarn: otherSends.length > 0,
+    otherSends: otherSends.map((e) => ({
+      accountName: e.accountName,
+      subject: e.subject,
+      timeAgo: formatTimeAgo(e.sentAt),
+    })),
   });
 }

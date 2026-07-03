@@ -11,6 +11,7 @@ import {
 import { getTemplateForAccount } from "@/lib/template";
 import type {
   AppSettings,
+  CrossAccountWarning,
   DuplicateWarning,
   HistoryEntry,
   PublicAccount,
@@ -59,10 +60,11 @@ export default function Home() {
     duplicateWarningDays: 15,
   });
 
-  const [duplicateModal, setDuplicateModal] = useState<{
-    warning: DuplicateWarning;
-    account: PublicAccount;
-  } | null>(null);
+  const [duplicateModal, setDuplicateModal] = useState<
+    | { kind: "same-account"; warning: DuplicateWarning; account: PublicAccount }
+    | { kind: "cross-account"; warning: CrossAccountWarning; account: PublicAccount }
+    | null
+  >(null);
 
   const [storageOk, setStorageOk] = useState<boolean | null>(null);
 
@@ -262,10 +264,20 @@ export default function Home() {
       });
       const data = await res.json();
 
+      if (data.crossAccountWarn && data.otherSends?.length) {
+        setDuplicateModal({
+          kind: "cross-account",
+          warning: { otherSends: data.otherSends },
+          account,
+        });
+        return;
+      }
+
       if (data.shouldWarn && data.lastSend) {
         setDuplicateModal({
-          account,
+          kind: "same-account",
           warning: { lastSend: data.lastSend, timeAgo: data.timeAgo },
+          account,
         });
         return;
       }
@@ -292,8 +304,23 @@ export default function Home() {
 
   return (
     <div className="min-h-screen w-full bg-zinc-50 font-sans dark:bg-zinc-950">
-      {duplicateModal && (
+      {duplicateModal?.kind === "cross-account" && (
         <DuplicateModal
+          kind="cross-account"
+          warning={duplicateModal.warning}
+          clientName={clientName.trim()}
+          clientEmail={clientEmail.trim()}
+          accountName={duplicateModal.account.name}
+          onCancel={() => setDuplicateModal(null)}
+          onConfirm={() => executeSend(duplicateModal.account)}
+          sending={
+            sendStatus[duplicateModal.account.id]?.state === "sending"
+          }
+        />
+      )}
+      {duplicateModal?.kind === "same-account" && (
+        <DuplicateModal
+          kind="same-account"
           warning={duplicateModal.warning}
           clientName={clientName.trim()}
           clientEmail={clientEmail.trim()}

@@ -140,10 +140,9 @@ export function TemplatesPanel({
         </label>
 
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Use <code>{"{Clientname}"}</code> where the client&apos;s first name
-          should appear. Default sends pick a short, natural subject per client
-          (e.g. &quot;Hi Joana&quot; or &quot;Permit drawings&quot;) — not
-          &quot;Joana, support for your Bark project&quot;.
+          Use <code>{"{Clientname}"}</code> for the first name. Each account has
+          a different voice (formal / casual / P.E. engineering-only) — reset
+          to default to load the latest version.
         </p>
 
         {message && (

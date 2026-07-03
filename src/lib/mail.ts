@@ -1,6 +1,7 @@
 import "server-only";
 import nodemailer from "nodemailer";
 import type { SmtpAccount } from "@/lib/accounts";
+import { getMailStyleForAccount } from "@/lib/mail-styles";
 import { getMistakeFooterForAccount } from "@/lib/template";
 
 export function createGmailTransporter(account: SmtpAccount) {
@@ -26,16 +27,49 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function buildHtmlBody(body: string, mistakeFooter: string): string {
+function buildHtmlBody(
+  accountId: string,
+  body: string,
+  mistakeFooter: string,
+): string {
+  const style = getMailStyleForAccount(accountId);
   const messageHtml = escapeHtml(body).replace(/\r?\n/g, "<br>\n");
   const footerHtml = escapeHtml(mistakeFooter.trim()).replace(/\r?\n/g, "<br>\n");
-  // Minimal HTML — mirrors plain text; heavy markup can hurt spam scores.
+
+  const bodyStyle = [
+    `font-family:${style.fontFamily}`,
+    `font-size:${style.fontSize}`,
+    `color:${style.textColor}`,
+    `line-height:${style.lineHeight}`,
+    `margin:0`,
+    `padding:${style.padding}`,
+  ].join(";");
+
+  const footerStyle = [
+    `margin-top:${style.footerMarginTop}`,
+    `font-size:${style.footerSize}`,
+    `color:${style.footerColor}`,
+    style.footerLayout === "italic" ? "font-style:italic" : "",
+  ]
+    .filter(Boolean)
+    .join(";");
+
+  if (style.footerLayout === "plain") {
+    return (
+      `<!DOCTYPE html>\n` +
+      `<html><head><meta charset="utf-8"></head>\n` +
+      `<body style="${bodyStyle}">` +
+      `<div>${messageHtml}${footerHtml ? `<br><br>${footerHtml}` : ""}</div>` +
+      `</body></html>`
+    );
+  }
+
   return (
     `<!DOCTYPE html>\n` +
     `<html><head><meta charset="utf-8"></head>\n` +
-    `<body style="font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#222;line-height:1.6;margin:0;padding:16px;">` +
+    `<body style="${bodyStyle}">` +
     `<div>${messageHtml}</div>` +
-    `<p style="margin-top:1.5em;font-size:13px;color:#555;">${footerHtml}</p>` +
+    `<p style="${footerStyle}">${footerHtml}</p>` +
     `</body></html>`
   );
 }
@@ -66,7 +100,7 @@ export function buildOutgoingMail(options: {
     replyTo: options.account.email,
     subject: options.subject.trim(),
     text,
-    html: buildHtmlBody(options.body, mistakeFooter),
+    html: buildHtmlBody(options.accountId, options.body, mistakeFooter),
     xMailer: false,
   };
 }
