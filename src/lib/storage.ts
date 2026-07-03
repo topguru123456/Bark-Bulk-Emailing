@@ -16,7 +16,17 @@ function hasRedis(): boolean {
 }
 
 function hasBlob(): boolean {
-  return !!process.env.BLOB_READ_WRITE_TOKEN;
+  return !!(
+    process.env.BLOB_READ_WRITE_TOKEN?.trim() ||
+    process.env.VERCEL_BLOB_READ_WRITE_TOKEN?.trim()
+  );
+}
+
+function blobToken(): string | undefined {
+  return (
+    process.env.BLOB_READ_WRITE_TOKEN?.trim() ||
+    process.env.VERCEL_BLOB_READ_WRITE_TOKEN?.trim()
+  );
 }
 
 function isVercel(): boolean {
@@ -67,8 +77,9 @@ export async function readJsonFile<T>(
   }
 
   if (backend === "blob") {
+    const token = blobToken();
     try {
-      const meta = await head(blobPath(filename));
+      const meta = await head(blobPath(filename), token ? { token } : undefined);
       const res = await fetch(meta.url);
       if (!res.ok) return defaultValue;
       return (await res.json()) as T;
@@ -103,12 +114,14 @@ export async function writeJsonFile<T>(
   }
 
   if (backend === "blob") {
+    const token = blobToken();
     await put(blobPath(filename), JSON.stringify(data, null, 2), {
       access: "public",
       addRandomSuffix: false,
       allowOverwrite: true,
       contentType: "application/json",
       cacheControlMaxAge: 60,
+      ...(token ? { token } : {}),
     });
     return;
   }

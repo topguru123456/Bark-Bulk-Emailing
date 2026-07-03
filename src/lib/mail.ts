@@ -1,6 +1,7 @@
 import "server-only";
 import nodemailer from "nodemailer";
 import type { SmtpAccount } from "@/lib/accounts";
+import { getMistakeFooterForAccount } from "@/lib/template";
 
 export function createGmailTransporter(account: SmtpAccount) {
   // Port 587 + STARTTLS matches typical mail-client behaviour (vs raw SSL on 465).
@@ -25,21 +26,15 @@ function escapeHtml(s: string): string {
     .replace(/"/g, "&quot;");
 }
 
-/** Small opt-out line — helps CAN-SPAM compliance and reduces spam reports. */
-const OPT_OUT_TEXT =
-  '\n\n—\nIf you prefer not to receive further messages, reply with "unsubscribe".';
-
-const OPT_OUT_HTML =
-  '<p style="margin-top:24px;font-size:12px;color:#666;">If you prefer not to receive further messages, reply with "unsubscribe".</p>';
-
-function buildHtmlBody(body: string): string {
+function buildHtmlBody(body: string, mistakeFooter: string): string {
   const messageHtml = escapeHtml(body).replace(/\r?\n/g, "<br>");
+  const footerHtml = escapeHtml(mistakeFooter.trim()).replace(/\r?\n/g, "<br>");
   return (
     `<!DOCTYPE html>` +
     `<html><head><meta charset="utf-8"></head>` +
     `<body style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#222;line-height:1.5;margin:0;padding:0;">` +
     `<div>${messageHtml}</div>` +
-    OPT_OUT_HTML +
+    `<p style="margin-top:24px;font-size:12px;color:#666;">${footerHtml}</p>` +
     `</body></html>`
   );
 }
@@ -55,12 +50,14 @@ export type OutgoingMail = {
 };
 
 export function buildOutgoingMail(options: {
+  accountId: string;
   account: { name: string; email: string };
   to: string;
   subject: string;
   body: string;
 }): OutgoingMail {
-  const text = options.body + OPT_OUT_TEXT;
+  const mistakeFooter = getMistakeFooterForAccount(options.accountId);
+  const text = options.body + mistakeFooter;
 
   return {
     from: { name: options.account.name, address: options.account.email },
@@ -68,7 +65,7 @@ export function buildOutgoingMail(options: {
     replyTo: options.account.email,
     subject: options.subject.trim(),
     text,
-    html: buildHtmlBody(options.body),
+    html: buildHtmlBody(options.body, mistakeFooter),
     xMailer: false,
   };
 }

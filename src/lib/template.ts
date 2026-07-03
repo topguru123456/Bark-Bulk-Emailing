@@ -11,7 +11,7 @@ export type AccountTemplate = {
 /** Account id → default compose content (see .env.local account order). */
 export const TEMPLATES_BY_ACCOUNT_ID: Record<string, AccountTemplate> = {
   "1": {
-    defaultSubject: "Proposal for Bark Project Services",
+    defaultSubject: "⭐⭐⭐Proposal for Bark Project Services ⭐⭐⭐",
     defaultBody: `Hi, {Clientname}
 
 I hope this message finds you well.
@@ -34,7 +34,7 @@ Kind regards,
 David`,
   },
   "2": {
-    defaultSubject: "Let's Support Your Bark Project",
+    defaultSubject: "🎯🎯🎯 Let's Support Your Bark Project 🎯🎯🎯",
     defaultBody: `Hello, {Clientname}
 
 I hope you're doing well.
@@ -50,7 +50,7 @@ Let me know if you'd like to connect.
 Best, Daniel`,
   },
   "3": {
-    defaultSubject: "Re: Job Request on Bark",
+    defaultSubject: "🔥🔥🔥 Re: Job Request on Bark 🔥🔥🔥",
     defaultBody: `Hello, {Clientname}
 
 Hope you are doing well.
@@ -75,7 +75,7 @@ Kind regards,
 James`,
   },
   "4": {
-    defaultSubject: "Get Faster City Permit Approval for your Bark Project",
+    defaultSubject: "🤝 Get Faster City Permit Approval for your Bark Project 🤝",
     defaultBody: `Hello, {Clientname}
 
 I have reviewed the work request you posted to bark.com.
@@ -98,7 +98,7 @@ Sincerely,
 Michael`,
   },
   "5": {
-    defaultSubject: "Permit Drawing Services for Your Bark Project",
+    defaultSubject: "🌟🌟🌟 Permit Drawing Services for Your Bark Project 🌟🌟🌟",
     defaultBody: `Hello, {Clientname}
 How are you?
 
@@ -114,7 +114,7 @@ Best regards,
 Joseph`,
   },
   "6": {
-    defaultSubject: "Licensed P.E. Services for Your Bark Project",
+    defaultSubject: "👋 Licensed P.E. Services for Your Bark Project",
     defaultBody: `Dear {Clientname},
 
 I hope you are doing well.
@@ -129,6 +129,23 @@ Sincerely,
 Robert, P.E.`,
   },
 };
+
+/** Per-account “wrong recipient” note — unique wording to match each sender’s voice. */
+const MISTAKE_FOOTER_BY_ACCOUNT_ID: Record<string, string> = {
+  "1": `\n\nP.S. If this proposal reached you in error, my apologies — a quick reply is all I need.`,
+  "2": `\n\nSorry if this ended up with the wrong person — just reply if so and I'll take care of it.`,
+  "3": `\n\nIf you received this in error, I apologize for the inconvenience. A brief reply would help me correct it.`,
+  "4": `\n\nShould this message not be intended for you, please accept my apologies. A short reply would be appreciated.`,
+  "5": `\n\nApologies if this wasn't meant for you — feel free to reply and I'll sort it out right away.`,
+  "6": `\n\nIf you are not the intended recipient, please disregard this note and let me know. My sincere apologies for any confusion.`,
+};
+
+const DEFAULT_MISTAKE_FOOTER =
+  "\n\nIf this message reached you in error, my apologies — please reply and let me know.";
+
+export function getMistakeFooterForAccount(accountId: string): string {
+  return MISTAKE_FOOTER_BY_ACCOUNT_ID[accountId] ?? DEFAULT_MISTAKE_FOOTER;
+}
 
 export function getTemplateForAccount(accountId: string): AccountTemplate {
   return (

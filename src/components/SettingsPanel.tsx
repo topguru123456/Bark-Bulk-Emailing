@@ -120,10 +120,14 @@ export function SettingsPanel({ settings, onSaved }: Props) {
               Open your Vercel project → <strong>Storage</strong>
             </li>
             <li>
-              Add <strong>Upstash Redis</strong> (recommended) or{" "}
-              <strong>Blob</strong>
+              Add <strong>Upstash Redis</strong> or <strong>Blob</strong>, connect
+              to this project
             </li>
-            <li>Connect it to this project and redeploy</li>
+            <li>
+              Ensure <code>BLOB_READ_WRITE_TOKEN</code> is in Vercel → Settings →
+              Environment Variables (all environments)
+            </li>
+            <li>Redeploy after adding storage or env vars</li>
           </ol>
         )}
       </div>
@@ -168,8 +172,8 @@ export function SettingsPanel({ settings, onSaved }: Props) {
             shows spam rates per account/domain.
           </li>
           <li>
-            An unsubscribe line is added automatically to every send (reply
-            &quot;unsubscribe&quot;).
+            Each sender has their own “wrong recipient” note at the bottom
+            (worded differently per account).
           </li>
         </ul>
         <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">

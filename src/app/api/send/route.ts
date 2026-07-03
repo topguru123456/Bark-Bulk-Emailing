@@ -81,6 +81,7 @@ export async function POST(request: Request) {
   const personalBody = applyClientPlaceholders(body, name);
 
   const mail = buildOutgoingMail({
+    accountId: account.id,
     account: { name: account.name, email: account.email },
     to,
     subject: personalSubject,
