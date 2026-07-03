@@ -39,6 +39,19 @@ export async function addHistoryEntry(
   return record;
 }
 
+export async function deleteHistoryEntry(id: string): Promise<boolean> {
+  const store = await loadStore();
+  const before = store.entries.length;
+  store.entries = store.entries.filter((e) => e.id !== id);
+  if (store.entries.length === before) return false;
+  await saveStore(store);
+  return true;
+}
+
+export async function clearHistory(): Promise<void> {
+  await saveStore({ entries: [] });
+}
+
 /** Most recent send to this client from this account within the window, if any. */
 export function findRecentSend(
   entries: HistoryEntry[],

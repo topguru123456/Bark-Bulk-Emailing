@@ -276,6 +276,20 @@ export default function Home() {
     await executeSend(account);
   }
 
+  async function handleDeleteHistory(id: string) {
+    const res = await fetch(`/api/history?id=${encodeURIComponent(id)}`, {
+      method: "DELETE",
+    });
+    if (!res.ok) throw new Error("Delete failed");
+    setHistory((prev) => prev.filter((e) => e.id !== id));
+  }
+
+  async function handleClearHistory() {
+    const res = await fetch("/api/history?all=true", { method: "DELETE" });
+    if (!res.ok) throw new Error("Clear failed");
+    setHistory([]);
+  }
+
   return (
     <div className="min-h-screen w-full bg-zinc-50 font-sans dark:bg-zinc-950">
       {duplicateModal && (
@@ -474,6 +488,9 @@ export default function Home() {
             entries={history}
             loading={historyLoading}
             onRefresh={loadHistory}
+            onDelete={handleDeleteHistory}
+            onClearAll={handleClearHistory}
+            autoRefresh
           />
         )}
 

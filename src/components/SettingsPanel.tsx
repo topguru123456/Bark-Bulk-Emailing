@@ -128,6 +128,56 @@ export function SettingsPanel({ settings, onSaved }: Props) {
         )}
       </div>
 
+      <div className="rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900 dark:bg-blue-950/30">
+        <p className="text-xs font-medium text-zinc-800 dark:text-zinc-200">
+          Inbox placement (avoid spam)
+        </p>
+        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          Emails sent through this app use Gmail SMTP from a server, not the
+          Gmail website. Filters treat that differently from mail you send
+          manually — even from the same account.
+        </p>
+        <ul className="mt-2 list-disc space-y-1.5 pl-4 text-xs text-zinc-600 dark:text-zinc-400">
+          <li>
+            <strong>Warm up each account</strong> — start with a few sends per
+            day, then increase slowly. Sudden volume spikes hurt trust.
+          </li>
+          <li>
+            <strong>Personalize every email</strong> — use{" "}
+            <code>{"{Clientname}"}</code> and vary subject/body when possible.
+            Identical bulk copy triggers filters.
+          </li>
+          <li>
+            <strong>One account per client</strong> — don&apos;t send the same
+            client from all 6 accounts.
+          </li>
+          <li>
+            <strong>Ask recipients to reply</strong> — a reply strongly signals
+            legitimacy to Gmail.
+          </li>
+          <li>
+            <strong>Monitor Postmaster Tools</strong> —{" "}
+            <a
+              href="https://postmaster.google.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-blue-600 underline dark:text-blue-400"
+            >
+              postmaster.google.com
+            </a>{" "}
+            shows spam rates per account/domain.
+          </li>
+          <li>
+            An unsubscribe line is added automatically to every send (reply
+            &quot;unsubscribe&quot;).
+          </li>
+        </ul>
+        <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
+          The app already uses STARTTLS on port 587, proper HTML + plain-text
+          parts, Reply-To, and no software X-Mailer header.
+        </p>
+      </div>
+
       <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-zinc-950">
         <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
           Timezone

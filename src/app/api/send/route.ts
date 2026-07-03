@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
-import nodemailer from "nodemailer";
 import { getAccountById } from "@/lib/accounts";
 import { addHistoryEntry } from "@/lib/history";
+import { buildOutgoingMail, createGmailTransporter } from "@/lib/mail";
 import { applyClientPlaceholders } from "@/lib/template";
 
 export const dynamic = "force-dynamic";
@@ -16,13 +16,6 @@ type SendRequest = {
 };
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
 
 export async function POST(request: Request) {
   let payload: SendRequest;
@@ -62,15 +55,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const transporter = nodemailer.createTransport({
-    host: "smtp.gmail.com",
-    port: 465,
-    secure: true,
-    auth: { user: account.email, pass: account.password },
-    connectionTimeout: 10_000,
-    greetingTimeout: 10_000,
-    socketTimeout: 20_000,
-  });
+  const transporter = createGmailTransporter(account);
 
   try {
     await transporter.verify();
@@ -95,21 +80,15 @@ export async function POST(request: Request) {
   const personalSubject = applyClientPlaceholders(subject, name);
   const personalBody = applyClientPlaceholders(body, name);
 
-  const messageHtml = escapeHtml(personalBody).replace(/\r?\n/g, "<br>");
-  const html =
-    `<div style="font-family: Arial, Helvetica, sans-serif; font-size:14px; color:#202020; line-height:1.5;">` +
-    messageHtml +
-    `</div>`;
-  const text = personalBody;
+  const mail = buildOutgoingMail({
+    account: { name: account.name, email: account.email },
+    to,
+    subject: personalSubject,
+    body: personalBody,
+  });
 
   try {
-    await transporter.sendMail({
-      from: { name: account.name, address: account.email },
-      to,
-      subject: personalSubject,
-      text,
-      html,
-    });
+    await transporter.sendMail(mail);
     transporter.close();
 
     const entry = await addHistoryEntry({
