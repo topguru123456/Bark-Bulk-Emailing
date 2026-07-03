@@ -64,6 +64,8 @@ export default function Home() {
     account: PublicAccount;
   } | null>(null);
 
+  const [storageOk, setStorageOk] = useState<boolean | null>(null);
+
   const loadTemplates = useCallback(async () => {
     try {
       const res = await fetch("/api/templates");
@@ -116,6 +118,11 @@ export default function Home() {
     loadTemplates();
     loadHistory();
     loadSettings();
+
+    fetch("/api/storage/status")
+      .then((r) => r.json())
+      .then((data: { persistent?: boolean }) => setStorageOk(!!data.persistent))
+      .catch(() => setStorageOk(null));
   }, [loadTemplates, loadHistory, loadSettings]);
 
   useEffect(() => {
@@ -299,6 +306,17 @@ export default function Home() {
             JST
           </span>
         </header>
+
+        {storageOk === false && (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">
+            <p className="font-medium">History and templates are not being saved</p>
+            <p className="mt-1 text-xs opacity-90">
+              Add <span className="font-medium">Upstash Redis</span> or{" "}
+              <span className="font-medium">Blob</span> storage in your Vercel
+              project (Storage tab), then redeploy. See Settings for steps.
+            </p>
+          </div>
+        )}
 
         <nav
           className="flex gap-1 rounded-xl border border-zinc-200 bg-white p-1 dark:border-zinc-800 dark:bg-zinc-900"

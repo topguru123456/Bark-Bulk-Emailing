@@ -8,15 +8,28 @@ type Props = {
   onSaved: (settings: AppSettings) => void;
 };
 
+type StorageStatus = {
+  backend: string;
+  persistent: boolean;
+};
+
 export function SettingsPanel({ settings, onSaved }: Props) {
   const [days, setDays] = useState(String(settings.duplicateWarningDays));
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [storage, setStorage] = useState<StorageStatus | null>(null);
 
   useEffect(() => {
     setDays(String(settings.duplicateWarningDays));
   }, [settings.duplicateWarningDays]);
+
+  useEffect(() => {
+    fetch("/api/storage/status")
+      .then((r) => r.json())
+      .then(setStorage)
+      .catch(() => setStorage(null));
+  }, []);
 
   async function handleSave(e: React.FormEvent) {
     e.preventDefault();
@@ -81,19 +94,38 @@ export function SettingsPanel({ settings, onSaved }: Props) {
         />
       </label>
 
-      <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-zinc-950">
+      <div
+        className={`rounded-lg px-4 py-3 ${
+          storage?.persistent
+            ? "bg-green-50 dark:bg-green-950/30"
+            : "bg-amber-50 dark:bg-amber-950/30"
+        }`}
+      >
         <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">
-          Vercel storage
+          Data storage
+          {storage && (
+            <span className="ml-2 font-normal text-zinc-500">
+              ({storage.backend}
+              {storage.persistent ? " · saved" : " · not saved"})
+            </span>
+          )}
         </p>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          History, templates, and settings need persistent storage on Vercel.
+          History, templates, and settings all use the same storage. On Vercel
+          you need a database — the server filesystem is read-only.
         </p>
-        <p className="mt-1 text-xs text-zinc-500 dark:text-zinc-500">
-          In your Vercel project go to{" "}
-          <span className="font-medium">Storage → Blob → Create</span>, then
-          redeploy. Vercel adds{" "}
-          <code className="text-xs">BLOB_READ_WRITE_TOKEN</code> automatically.
-        </p>
+        {!storage?.persistent && (
+          <ol className="mt-2 list-decimal space-y-1 pl-4 text-xs text-zinc-600 dark:text-zinc-400">
+            <li>
+              Open your Vercel project → <strong>Storage</strong>
+            </li>
+            <li>
+              Add <strong>Upstash Redis</strong> (recommended) or{" "}
+              <strong>Blob</strong>
+            </li>
+            <li>Connect it to this project and redeploy</li>
+          </ol>
+        )}
       </div>
 
       <div className="rounded-lg bg-zinc-50 px-4 py-3 dark:bg-zinc-950">
