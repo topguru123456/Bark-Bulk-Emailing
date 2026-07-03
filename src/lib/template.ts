@@ -1,13 +1,11 @@
 /**
  * Default subject + body per sending account (matched by account id 1–6).
  * Placeholder: {Clientname} — the first name you enter on the Send tab.
- * Default sends get a human subject line + slight greeting/opener variation per client.
+ * The template body is what gets sent, except for placeholder replacement.
  */
 
 import {
   applyPersonalization,
-  composeHumanSubject,
-  pickVariant,
   sanitizeSubject,
   type PersonalizeContext,
 } from "@/lib/personalize";
@@ -17,164 +15,93 @@ export type AccountTemplate = {
   defaultBody: string;
 };
 
-/** Per-account greetings — not shared, so six sends don't all open "Hi Joana". */
-const GREETING_VARIANTS_BY_ACCOUNT: Record<string, string[]> = {
-  "1": ["Dear {Clientname},", "Dear {Clientname}", "Hello {Clientname},"],
-  "2": ["Hey {Clientname}", "Hi {Clientname}", "{Clientname} —"],
-  "3": ["Hello {Clientname},", "Dear {Clientname},", "Good day {Clientname},"],
-  "4": ["Hello {Clientname},", "Hi {Clientname},", "{Clientname},"],
-  "5": ["Hi {Clientname}", "{Clientname},", "Hey {Clientname},"],
-  "6": ["Dear {Clientname},", "Dear {Clientname}", "To {Clientname},"],
-};
-
-/** Default first-line opener in each template body (replaced with a variant at send). */
-const DEFAULT_OPENER_BY_ACCOUNT: Record<string, string> = {
-  "1": "Thank you for the opportunity to submit a proposal for your project.",
-  "2": "Saw your listing and figured I'd reach out directly.",
-  "3": "I am writing to express my interest in the work you posted and to submit a formal proposal.",
-  "4": "Permit delays usually come from drawings that don't match what the city expects — that's the part we focus on.",
-  "5": "Need stamped drawings filed with the city?",
-  "6": "I am a licensed Professional Engineer and would be glad to review whether your project needs a P.E. stamp or structural calcs.",
-};
-
-/** Alternate openers — distinct voice per account, no copy-paste across senders. */
-const OPENER_VARIANTS_BY_ACCOUNT: Record<string, string[]> = {
-  "1": [
-    "Thank you for the opportunity to submit a proposal for your project.",
-    "We would like to put forward a formal scope for architectural and engineering permit drawings.",
-    "Following your listing, our team prepared a brief outline of how we can support city submission.",
-  ],
-  "2": [
-    "Saw your listing and figured I'd reach out directly.",
-    "Looks like you might need a permit drawing set — that's what I do most days.",
-    "Not sure if you've already lined someone up, but I had a minute and wanted to write.",
-  ],
-  "3": [
-    "I am writing to express my interest in the work you posted and to submit a formal proposal.",
-    "Your project requirements align closely with the permit packages I prepare for city review.",
-    "After reviewing your listing, I believe I can deliver a complete submission-ready drawing set.",
-  ],
-  "4": [
-    "Permit delays usually come from drawings that don't match what the city expects — that's the part we focus on.",
-    "Most plan-check cycles stretch out because of fixable drawing gaps — we close those before submittal.",
-    "I reviewed what you posted and think we can shorten the path from drawings to approval.",
-  ],
-  "5": [
-    "Need stamped drawings filed with the city?",
-    "If you're still looking for someone to turn around a filing set, I can help.",
-    "Quick note — I do permit-ready drawing packages when you need them fast.",
-  ],
-  "6": [
-    "I am a licensed Professional Engineer and would be glad to review whether your project needs a P.E. stamp or structural calcs.",
-    "Depending on jurisdiction, your build may require engineering sign-off — that's where I come in.",
-    "I focus on calculations, structural review, and P.E. stamping rather than full architectural sets.",
-  ],
-};
-
 /** Account id → default compose content (see .env.local account order). */
 export const TEMPLATES_BY_ACCOUNT_ID: Record<string, AccountTemplate> = {
   "1": {
-    defaultSubject: "Proposal for Bark Project Services",
+    defaultSubject: "{Clientname} — Bark request review",
     defaultBody: `Dear {Clientname},
 
-Thank you for the opportunity to submit a proposal for your project.
+I am a licensed Professional Engineer and saw your Bark request.
 
-Our firm provides integrated architectural and engineering services for permit submission across the United States. We prepare code-compliant construction documents aligned to local jurisdiction requirements.
+I can help prepare a permit-ready package for your project, including architectural drawings and engineering coordination where the city requires it. My focus is to make the set complete enough for submission, not just attractive on paper.
 
-Scope of Services:
-- Architectural permit drawings
-- Engineering coordination (structural / MEP as required)
-- Code compliance review
-- City submission support
-
-We would welcome the chance to discuss your timeline and tailor the deliverable list to your needs.
+If you can share the project address, scope, and any city comments you already have, I can review the likely requirements and outline the next step.
 
 Respectfully,
-David
-Architectural & Engineering Services`,
+David`,
   },
   "2": {
-    defaultSubject: "Let's Support Your Bark Project",
-    defaultBody: `Hey {Clientname}
+    defaultSubject: "Licensed P.E. for your Bark request",
+    defaultBody: `Hello {Clientname},
 
-Saw your listing and figured I'd reach out directly.
+I am a licensed Professional Engineer and saw your Bark request.
 
-I help contractors and designers get permit drawings through city review — usually architectural sets with structural coordination when it's needed. I'm easy to work with on timeline and markups.
+If you are still comparing options, I can help you identify what drawings or engineering items the city will expect before you spend time on the wrong package. I keep the process practical: review the scope, confirm the permit path, then prepare what is needed.
 
-If you're still looking for someone, happy to jump on a quick call or just reply here.
+Reply with the project type and city, and I can tell you what I would check first.
 
-— Daniel`,
+Daniel`,
   },
   "3": {
-    defaultSubject: "Permit drawing services for your Bark project",
+    defaultSubject: "Bark permit drawing review",
     defaultBody: `Hello {Clientname},
 
-I am writing to express my interest in the work you posted and to submit a formal proposal.
+I am a licensed Professional Engineer and reviewed your Bark request.
 
-1. Scope
-Full architectural permit drawing sets, structural coordination where required, and documentation formatted for your city's plan-check process.
+For permit work, the weak point is usually not one drawing; it is coordination between the architectural sheets, code notes, and engineering requirements. I can prepare or review the package so the submittal is technically consistent before it reaches plan check.
 
-2. Compliance
-Drawings prepared to IBC and applicable local amendments, with a pre-submittal review to reduce reviewer comments.
-
-3. Deliverables
-Submission-ready PDF sets, revision support through plan check, and coordination with your design intent.
-
-I work independently and manage projects from intake through approval. Please let me know if you would like to discuss jurisdiction-specific requirements.
+If you send the scope and jurisdiction, I can respond with the drawing list I would expect for approval.
 
 Kind regards,
-James
-Independent Permit Drawing Consultant`,
+James`,
   },
   "4": {
-    defaultSubject: "Get Faster City Permit Approval for your Bark Project",
-    defaultBody: `Hello {Clientname},
+    defaultSubject: "Plan-check help for your Bark request",
+    defaultBody: `Hi {Clientname},
 
-Permit delays usually come from drawings that don't match what the city expects — that's the part we focus on.
+I am a licensed Professional Engineer and saw your Bark request.
 
-We prepare architectural permit packages and coordinate engineering so submittals move through plan check with fewer rounds. Typical scope covers drawing production, code verification, and city-ready document formatting.
+My work is centered on permit approval: drawings that answer the city's review points, code notes that match the project, and engineering coordination before submittal. That usually saves more time than trying to fix a rejected set later.
 
-If timing matters on your side, reply and I can share relevant samples and a realistic turnaround.
+If timing is important, send the project location and a short description. I can let you know what may slow the permit down.
 
-Michael
-Permit Drawing Services`,
+Michael`,
   },
   "5": {
-    defaultSubject: "Permit Drawing Services for Your Bark Project",
-    defaultBody: `Hi {Clientname}
+    defaultSubject: "Stamped drawings for Bark request",
+    defaultBody: `Hi {Clientname},
 
-Need stamped drawings filed with the city?
+I am a licensed Professional Engineer and saw your Bark request.
 
-I turn around permit-ready sets — architectural plus engineering when stamps are required — built to local code and formatted for filing. Short projects welcome.
+If the job needs stamped drawings or a clean permit set, I can help turn the scope into documents the city can actually review. I prefer to start with the practical items: location, work type, existing conditions, and whether structural changes are involved.
 
-Reply if you want availability this week.
+Send those details if you have them, and I can confirm whether I am a fit.
 
 Joseph`,
   },
   "6": {
-    defaultSubject: "Licensed P.E. Services for Your Bark Project",
+    defaultSubject: "P.E. review for your Bark request",
     defaultBody: `Dear {Clientname},
 
-I am a licensed Professional Engineer and would be glad to review whether your project needs a P.E. stamp or structural calcs.
+I am a licensed Professional Engineer and came across your Bark request.
 
-My practice covers engineering analysis, structural review, and stamped documentation for jurisdictions that require professional sign-off. I do not produce full architectural plan sets — I partner on the engineering side or stamp coordinated drawings prepared by others.
+I can assist with engineering review, structural calculations, and stamped documentation when your jurisdiction requires professional sign-off. If architectural sheets are already being prepared, I can coordinate with them; if not, I can advise what engineering information should be included.
 
-If your permit path requires P.E. involvement, I would be pleased to discuss scope and schedule.
+Please reply with the project location and the type of work, and I can tell you what P.E. involvement is likely needed.
 
 Sincerely,
-Robert, P.E.
-Licensed Professional Engineer`,
+Robert, P.E.`,
   },
 };
 
 /** Per-account “wrong recipient” note — structure and tone differ, not just wording. */
 const MISTAKE_FOOTER_BY_ACCOUNT_ID: Record<string, string> = {
-  "1": `\n\n(P.S. If this proposal was sent to the wrong person, please accept my apologies — a brief reply is sufficient.)`,
-  "2": `\n\n(wrong person? just say so — no worries)`,
+  "1": `\n\nP.S. If I reached the wrong person, please accept my apologies — a brief reply is enough.`,
+  "2": `\n\nIf this was sent to the wrong person, please let me know and I will correct it.`,
   "3": `\n\nIf this message was not intended for you, I apologize for the error. A short reply would help me correct my records.`,
-  "4": `\n\n— If you are not the intended recipient, my apologies; a quick note back would be appreciated.`,
-  "5": `\n\nnot for you? my bad, reply and i'll fix it`,
-  "6": `\n\nIf you received this correspondence in error, please notify me at your earliest convenience. Respectfully, Robert`,
+  "4": `\n\nIf you are not the right contact for this request, my apologies — please reply and I will update my notes.`,
+  "5": `\n\nIf I reached you by mistake, please reply and I will not contact you again about this request.`,
+  "6": `\n\nIf you received this correspondence in error, please notify me and accept my apologies.`,
 };
 
 const DEFAULT_MISTAKE_FOOTER =
@@ -193,77 +120,39 @@ export function getTemplateForAccount(accountId: string): AccountTemplate {
   );
 }
 
-function shouldUseDefaultHumanization(accountId: string, text: string, kind: "subject" | "body"): boolean {
+function shouldUseLegacySubjectCleanup(accountId: string, subject: string): boolean {
   const defaults = getTemplateForAccount(accountId);
-  const baseline = kind === "subject" ? defaults.defaultSubject : defaults.defaultBody;
-
-  if (text === baseline) return true;
-
-  if (kind === "subject") {
-    const sanitized = sanitizeSubject(text);
-    const defaultSanitized = sanitizeSubject(baseline);
-    if (sanitized === defaultSanitized) return true;
-    if (/^re:\s*/i.test(text.trim())) return true;
-    if (/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/u.test(text)) return true;
-    // Old emoji defaults or legacy "Name, support for your Bark project" style
-    if (/,\s*(support|proposal|permit|engineering|licensed)/i.test(text)) return true;
-    if (/your bark project/i.test(text)) return true;
-  }
-
-  if (kind === "body") {
-    // Still on default if only whitespace differs, or starts with default greeting block
-    const norm = (s: string) => s.replace(/\r\n/g, "\n").trim();
-    if (norm(text) === norm(baseline)) return true;
-    const firstBlock = norm(text).split("\n\n")[0] ?? "";
-    const defaultFirst = norm(baseline).split("\n\n")[0] ?? "";
-    if (firstBlock === defaultFirst) return true;
-  }
-
+  if (subject === defaults.defaultSubject) return false;
+  if (/^re:\s*/i.test(subject.trim())) return true;
+  if (/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/u.test(subject)) return true;
+  if (/,\s*(support|proposal|permit|engineering|licensed)/i.test(subject)) return true;
   return false;
 }
 
-/** Compose a short human subject when using default / legacy templates. */
+/** Send the visible subject with placeholder replacement and spammy cleanup only. */
 export function resolveSubjectForSend(options: {
   accountId: string;
   subjectFromTemplate: string;
   clientEmail: string;
   ctx: PersonalizeContext;
 }): string {
-  const { accountId, subjectFromTemplate, clientEmail, ctx } = options;
+  const { accountId, subjectFromTemplate, ctx } = options;
 
-  const raw = shouldUseDefaultHumanization(accountId, subjectFromTemplate, "subject")
-    ? composeHumanSubject(accountId, clientEmail, ctx)
+  const raw = shouldUseLegacySubjectCleanup(accountId, subjectFromTemplate)
+    ? sanitizeSubject(subjectFromTemplate)
     : subjectFromTemplate;
 
   return sanitizeSubject(applyPersonalization(raw, ctx));
 }
 
-/** Swap greeting + opener on default bodies so copy isn't byte-identical every send. */
+/** Send the visible body with placeholder replacement only. */
 export function resolveBodyForSend(options: {
   accountId: string;
   bodyFromTemplate: string;
   clientEmail: string;
   ctx: PersonalizeContext;
 }): string {
-  const { accountId, bodyFromTemplate, clientEmail, ctx } = options;
-  let body = bodyFromTemplate;
-
-  if (shouldUseDefaultHumanization(accountId, bodyFromTemplate, "body")) {
-    const normalized = body.replace(/\r\n/g, "\n");
-    const firstLine = normalized.split("\n")[0] ?? "";
-    const defaultOpener = DEFAULT_OPENER_BY_ACCOUNT[accountId];
-    const openers = OPENER_VARIANTS_BY_ACCOUNT[accountId] ?? [defaultOpener];
-    const greetings = GREETING_VARIANTS_BY_ACCOUNT[accountId] ?? ["Hi {Clientname}"];
-    const newGreeting = pickVariant(greetings, clientEmail, 2);
-    const newOpener = pickVariant(openers, clientEmail, 3);
-
-    body = normalized.replace(firstLine, newGreeting);
-    if (defaultOpener) {
-      body = body.replace(defaultOpener, newOpener);
-    }
-  }
-
-  return applyPersonalization(body, ctx);
+  return applyPersonalization(options.bodyFromTemplate, options.ctx);
 }
 
 /** Replace personalization placeholders in subject or body. */

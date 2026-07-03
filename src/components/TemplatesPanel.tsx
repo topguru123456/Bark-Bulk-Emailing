@@ -16,6 +16,7 @@ type Props = {
   onUpdate: (accountId: string, patch: Partial<TemplateContent>) => void;
   onSave: (accountId: string) => Promise<void>;
   onReset: (accountId: string) => Promise<void>;
+  onResetAll: () => Promise<void>;
 };
 
 export function TemplatesPanel({
@@ -26,9 +27,11 @@ export function TemplatesPanel({
   onUpdate,
   onSave,
   onReset,
+  onResetAll,
 }: Props) {
   const [saving, setSaving] = useState(false);
   const [resetting, setResetting] = useState(false);
+  const [resettingAll, setResettingAll] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
   const active = accounts.find((a) => a.id === activeAccountId);
@@ -58,6 +61,19 @@ export function TemplatesPanel({
       setMessage("Failed to reset template.");
     } finally {
       setResetting(false);
+    }
+  }
+
+  async function handleResetAll() {
+    setResettingAll(true);
+    setMessage(null);
+    try {
+      await onResetAll();
+      setMessage("All templates reset to the latest defaults.");
+    } catch {
+      setMessage("Failed to reset all templates.");
+    } finally {
+      setResettingAll(false);
     }
   }
 
@@ -140,9 +156,9 @@ export function TemplatesPanel({
         </label>
 
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Use <code>{"{Clientname}"}</code> for the first name. Each account has
-          a different voice (formal / casual / P.E. engineering-only) — reset
-          to default to load the latest version.
+          Use <code>{"{Clientname}"}</code> for the first name. The subject and
+          message shown here are what gets sent, with only placeholders and
+          basic subject cleanup applied.
         </p>
 
         {message && (
@@ -173,6 +189,14 @@ export function TemplatesPanel({
             className="inline-flex h-10 items-center justify-center rounded-full border border-zinc-300 px-5 text-sm font-medium text-zinc-700 transition-colors hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-600 dark:text-zinc-300 dark:hover:bg-zinc-800"
           >
             {resetting ? "Resetting…" : "Reset to default"}
+          </button>
+          <button
+            type="button"
+            onClick={handleResetAll}
+            disabled={resettingAll}
+            className="inline-flex h-10 items-center justify-center rounded-full border border-red-200 px-5 text-sm font-medium text-red-700 transition-colors hover:bg-red-50 disabled:opacity-50 dark:border-red-900 dark:text-red-300 dark:hover:bg-red-950/30"
+          >
+            {resettingAll ? "Resetting all…" : "Reset all latest defaults"}
           </button>
         </div>
       </div>

@@ -147,9 +147,9 @@ export function SettingsPanel({ settings, onSaved }: Props) {
             day, then increase slowly. Sudden volume spikes hurt trust.
           </li>
           <li>
-            <strong>Distinct senders</strong> — each account has its own voice,
-            font, subject vocabulary, and body structure (formal proposal vs
-            casual note vs P.E. engineering).
+            <strong>Approved copy matters most</strong> — each default email now
+            starts from the licensed P.E. + Bark request context, then changes
+            the service angle by account. Avoid generic sales hooks.
           </li>
           <li>
             <strong>Duplicate warning</strong> — the app only warns when the
@@ -173,14 +173,13 @@ export function SettingsPanel({ settings, onSaved }: Props) {
             shows spam rates per account/domain.
           </li>
           <li>
-            Each sender has their own “wrong recipient” note at the bottom
-            (worded differently per account).
+            Keep each send near plain text: one clear service angle, one reply
+            request, no fake reply prefixes, no emoji, no hidden body rewriting.
           </li>
         </ul>
         <p className="mt-2 text-xs text-zinc-500 dark:text-zinc-500">
-          Each account uses its own HTML font/layout, subject vocabulary, greeting
-          style, and body structure. Reset templates to pick up the latest
-          defaults.
+          Reset templates after a copy update; saved templates keep their old
+          text until you reset them.
         </p>
       </div>
 

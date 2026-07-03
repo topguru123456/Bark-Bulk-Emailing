@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getAccounts } from "@/lib/accounts";
 import {
   getAllTemplates,
+  resetAllTemplates,
   resetTemplate,
   saveTemplate,
   type StoredTemplate,
@@ -50,8 +51,8 @@ export async function PUT(request: Request) {
 }
 
 type PatchRequest = {
-  accountId: string;
-  action: "reset";
+  accountId?: string;
+  action: "reset" | "resetAll";
 };
 
 export async function PATCH(request: Request) {
@@ -60,6 +61,13 @@ export async function PATCH(request: Request) {
     payload = (await request.json()) as PatchRequest;
   } catch {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
+  }
+
+  if (payload.action === "resetAll") {
+    await resetAllTemplates();
+    const accounts = getAccounts();
+    const templates = await getAllTemplates(accounts.map((a) => a.id));
+    return NextResponse.json({ templates });
   }
 
   if (payload.action !== "reset" || !payload.accountId) {

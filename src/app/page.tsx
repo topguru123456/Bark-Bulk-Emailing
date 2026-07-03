@@ -178,6 +178,17 @@ export default function Home() {
     setTemplates((prev) => ({ ...prev, [accountId]: data.template }));
   }
 
+  async function resetAllTemplates() {
+    const res = await fetch("/api/templates", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "resetAll" }),
+    });
+    if (!res.ok) throw new Error("Reset all failed");
+    const data = await res.json();
+    if (data.templates) setTemplates(data.templates);
+  }
+
   const clientReady =
     clientName.trim().length > 0 && EMAIL_RE.test(clientEmail.trim());
 
@@ -480,6 +491,7 @@ export default function Home() {
             onUpdate={updateTemplateLocal}
             onSave={saveTemplate}
             onReset={resetTemplate}
+            onResetAll={resetAllTemplates}
           />
         )}
 
