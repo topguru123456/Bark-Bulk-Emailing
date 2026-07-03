@@ -2,7 +2,10 @@ import { NextResponse } from "next/server";
 import { getAccountById } from "@/lib/accounts";
 import { addHistoryEntry } from "@/lib/history";
 import { buildOutgoingMail, createGmailTransporter } from "@/lib/mail";
-import { applyClientPlaceholders } from "@/lib/template";
+import {
+  resolveBodyForSend,
+  resolveSubjectForSend,
+} from "@/lib/template";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -77,8 +80,19 @@ export async function POST(request: Request) {
   }
 
   const name = clientName.trim();
-  const personalSubject = applyClientPlaceholders(subject, name);
-  const personalBody = applyClientPlaceholders(body, name);
+  const ctx = { clientName: name, senderName: account.name };
+  const personalSubject = resolveSubjectForSend({
+    accountId: account.id,
+    subjectFromTemplate: subject,
+    clientEmail: to,
+    ctx,
+  });
+  const personalBody = resolveBodyForSend({
+    accountId: account.id,
+    bodyFromTemplate: body,
+    clientEmail: to,
+    ctx,
+  });
 
   const mail = buildOutgoingMail({
     accountId: account.id,
@@ -105,6 +119,7 @@ export async function POST(request: Request) {
       status: "sent" as const,
       to,
       from: account.email,
+      subject: personalSubject,
       historyEntry: entry,
     });
   } catch (err) {

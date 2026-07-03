@@ -27,14 +27,15 @@ function escapeHtml(s: string): string {
 }
 
 function buildHtmlBody(body: string, mistakeFooter: string): string {
-  const messageHtml = escapeHtml(body).replace(/\r?\n/g, "<br>");
-  const footerHtml = escapeHtml(mistakeFooter.trim()).replace(/\r?\n/g, "<br>");
+  const messageHtml = escapeHtml(body).replace(/\r?\n/g, "<br>\n");
+  const footerHtml = escapeHtml(mistakeFooter.trim()).replace(/\r?\n/g, "<br>\n");
+  // Minimal HTML — mirrors plain text; heavy markup can hurt spam scores.
   return (
-    `<!DOCTYPE html>` +
-    `<html><head><meta charset="utf-8"></head>` +
-    `<body style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#222;line-height:1.5;margin:0;padding:0;">` +
+    `<!DOCTYPE html>\n` +
+    `<html><head><meta charset="utf-8"></head>\n` +
+    `<body style="font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#222;line-height:1.6;margin:0;padding:16px;">` +
     `<div>${messageHtml}</div>` +
-    `<p style="margin-top:24px;font-size:12px;color:#666;">${footerHtml}</p>` +
+    `<p style="margin-top:1.5em;font-size:13px;color:#555;">${footerHtml}</p>` +
     `</body></html>`
   );
 }

@@ -1,17 +1,78 @@
 /**
  * Default subject + body per sending account (matched by account id 1–6).
- * Placeholders: {Clientname} is replaced with the client name at send time.
+ * Placeholder: {Clientname} — the first name you enter on the Send tab.
+ * Default sends get a human subject line + slight greeting/opener variation per client.
  */
+
+import {
+  applyPersonalization,
+  composeHumanSubject,
+  pickVariant,
+  sanitizeSubject,
+  type PersonalizeContext,
+} from "@/lib/personalize";
 
 export type AccountTemplate = {
   defaultSubject: string;
   defaultBody: string;
 };
 
+/** Greeting swaps for default bodies — "Hello, Joana" vs "Hi Joana" etc. */
+const GREETING_VARIANTS = [
+  "Hi {Clientname}",
+  "Hello {Clientname}",
+  "Hello, {Clientname}",
+  "Hi, {Clientname}",
+];
+
+/** Default first-line opener in each template body (replaced with a variant at send). */
+const DEFAULT_OPENER_BY_ACCOUNT: Record<string, string> = {
+  "1": "I hope this message finds you well.",
+  "2": "I hope you're doing well.",
+  "3": "Hope you are doing well.",
+  "4": "I have reviewed the work request you posted to bark.com.",
+  "5": "How are you?",
+  "6": "I hope you are doing well.",
+};
+
+/** Alternate openers swapped on default bodies (per account voice). */
+const OPENER_VARIANTS_BY_ACCOUNT: Record<string, string[]> = {
+  "1": [
+    "I hope this message finds you well.",
+    "I wanted to reach out about your project.",
+    "I saw your listing and thought I'd get in touch.",
+  ],
+  "2": [
+    "I hope you're doing well.",
+    "I saw your listing and wanted to reach out.",
+    "I came across your project and thought I'd write.",
+  ],
+  "3": [
+    "Hope you are doing well.",
+    "I saw your project online and wanted to connect.",
+    "I'm reaching out about the work you posted.",
+  ],
+  "4": [
+    "I have reviewed the work request you posted to bark.com.",
+    "I saw your listing and wanted to follow up.",
+    "I'm writing about the permit work you need.",
+  ],
+  "5": [
+    "How are you?",
+    "I hope you're doing well.",
+    "I saw your project and wanted to reach out.",
+  ],
+  "6": [
+    "I hope you are doing well.",
+    "I came across your project and wanted to connect.",
+    "I'm reaching out about the work you posted.",
+  ],
+};
+
 /** Account id → default compose content (see .env.local account order). */
 export const TEMPLATES_BY_ACCOUNT_ID: Record<string, AccountTemplate> = {
   "1": {
-    defaultSubject: "⭐⭐⭐Proposal for Bark Project Services ⭐⭐⭐",
+    defaultSubject: "Proposal for Bark Project Services",
     defaultBody: `Hi, {Clientname}
 
 I hope this message finds you well.
@@ -34,7 +95,7 @@ Kind regards,
 David`,
   },
   "2": {
-    defaultSubject: "🎯🎯🎯 Let's Support Your Bark Project 🎯🎯🎯",
+    defaultSubject: "Let's Support Your Bark Project",
     defaultBody: `Hello, {Clientname}
 
 I hope you're doing well.
@@ -50,7 +111,7 @@ Let me know if you'd like to connect.
 Best, Daniel`,
   },
   "3": {
-    defaultSubject: "🔥🔥🔥 Re: Job Request on Bark 🔥🔥🔥",
+    defaultSubject: "Permit drawing services for your Bark project",
     defaultBody: `Hello, {Clientname}
 
 Hope you are doing well.
@@ -75,7 +136,7 @@ Kind regards,
 James`,
   },
   "4": {
-    defaultSubject: "🤝 Get Faster City Permit Approval for your Bark Project 🤝",
+    defaultSubject: "Get Faster City Permit Approval for your Bark Project",
     defaultBody: `Hello, {Clientname}
 
 I have reviewed the work request you posted to bark.com.
@@ -98,7 +159,7 @@ Sincerely,
 Michael`,
   },
   "5": {
-    defaultSubject: "🌟🌟🌟 Permit Drawing Services for Your Bark Project 🌟🌟🌟",
+    defaultSubject: "Permit Drawing Services for Your Bark Project",
     defaultBody: `Hello, {Clientname}
 How are you?
 
@@ -114,7 +175,7 @@ Best regards,
 Joseph`,
   },
   "6": {
-    defaultSubject: "👋 Licensed P.E. Services for Your Bark Project",
+    defaultSubject: "Licensed P.E. Services for Your Bark Project",
     defaultBody: `Dear {Clientname},
 
 I hope you are doing well.
@@ -156,10 +217,90 @@ export function getTemplateForAccount(accountId: string): AccountTemplate {
   );
 }
 
-/** Replace {Clientname} placeholders (case-insensitive). */
+function shouldUseDefaultHumanization(accountId: string, text: string, kind: "subject" | "body"): boolean {
+  const defaults = getTemplateForAccount(accountId);
+  const baseline = kind === "subject" ? defaults.defaultSubject : defaults.defaultBody;
+
+  if (text === baseline) return true;
+
+  if (kind === "subject") {
+    const sanitized = sanitizeSubject(text);
+    const defaultSanitized = sanitizeSubject(baseline);
+    if (sanitized === defaultSanitized) return true;
+    if (/^re:\s*/i.test(text.trim())) return true;
+    if (/[\u{1F300}-\u{1FAFF}\u2600-\u27BF]/u.test(text)) return true;
+    // Old emoji defaults or legacy "Name, support for your Bark project" style
+    if (/,\s*(support|proposal|permit|engineering|licensed)/i.test(text)) return true;
+    if (/your bark project/i.test(text)) return true;
+  }
+
+  if (kind === "body") {
+    // Still on default if only whitespace differs, or starts with default greeting block
+    const norm = (s: string) => s.replace(/\r\n/g, "\n").trim();
+    if (norm(text) === norm(baseline)) return true;
+    const firstBlock = norm(text).split("\n\n")[0] ?? "";
+    const defaultFirst = norm(baseline).split("\n\n")[0] ?? "";
+    if (firstBlock === defaultFirst) return true;
+  }
+
+  return false;
+}
+
+/** Compose a short human subject when using default / legacy templates. */
+export function resolveSubjectForSend(options: {
+  accountId: string;
+  subjectFromTemplate: string;
+  clientEmail: string;
+  ctx: PersonalizeContext;
+}): string {
+  const { accountId, subjectFromTemplate, clientEmail, ctx } = options;
+
+  const raw = shouldUseDefaultHumanization(accountId, subjectFromTemplate, "subject")
+    ? composeHumanSubject(accountId, clientEmail, ctx)
+    : subjectFromTemplate;
+
+  return sanitizeSubject(applyPersonalization(raw, ctx));
+}
+
+/** Swap greeting + opener on default bodies so copy isn't byte-identical every send. */
+export function resolveBodyForSend(options: {
+  accountId: string;
+  bodyFromTemplate: string;
+  clientEmail: string;
+  ctx: PersonalizeContext;
+}): string {
+  const { accountId, bodyFromTemplate, clientEmail, ctx } = options;
+  let body = bodyFromTemplate;
+
+  if (shouldUseDefaultHumanization(accountId, bodyFromTemplate, "body")) {
+    const normalized = body.replace(/\r\n/g, "\n");
+    const firstLine = normalized.split("\n")[0] ?? "";
+    const defaultOpener = DEFAULT_OPENER_BY_ACCOUNT[accountId];
+    const openers = OPENER_VARIANTS_BY_ACCOUNT[accountId] ?? [defaultOpener];
+    const newGreeting = pickVariant(GREETING_VARIANTS, clientEmail, 2);
+    const newOpener = pickVariant(openers, clientEmail, 3);
+
+    body = normalized.replace(firstLine, newGreeting);
+    if (defaultOpener) {
+      body = body.replace(defaultOpener, newOpener);
+    }
+  }
+
+  return applyPersonalization(body, ctx);
+}
+
+/** Replace personalization placeholders in subject or body. */
+export function personalizeContent(
+  template: string,
+  ctx: PersonalizeContext,
+): string {
+  return applyPersonalization(template, ctx);
+}
+
+/** @deprecated Use personalizeContent with full context. */
 export function applyClientPlaceholders(
   template: string,
   clientName: string,
 ): string {
-  return template.replace(/\{Clientname\}/gi, clientName);
+  return applyPersonalization(template, { clientName, senderName: "" });
 }

@@ -372,11 +372,11 @@ export default function Home() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-1.5">
                   <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">
-                    Name
+                    First name
                   </span>
                   <input
                     type="text"
-                    placeholder="e.g. John Smith"
+                    placeholder="e.g. Joana"
                     value={clientName}
                     onChange={(e) => {
                       setClientName(e.target.value);
