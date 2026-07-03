@@ -73,25 +73,3 @@ export function findRecentSend(
 
   return match[0] ?? null;
 }
-
-/** Sends to this client from a different account within the window. */
-export function findSendsFromOtherAccounts(
-  entries: HistoryEntry[],
-  accountId: string,
-  clientEmail: string,
-  withinDays: number,
-): HistoryEntry[] {
-  const normalized = clientEmail.trim().toLowerCase();
-  const cutoff = Date.now() - withinDays * 24 * 60 * 60 * 1000;
-
-  return entries
-    .filter(
-      (e) =>
-        e.accountId !== accountId &&
-        e.clientEmail.trim().toLowerCase() === normalized &&
-        new Date(e.sentAt).getTime() >= cutoff,
-    )
-    .sort(
-      (a, b) => new Date(b.sentAt).getTime() - new Date(a.sentAt).getTime(),
-    );
-}

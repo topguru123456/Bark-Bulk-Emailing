@@ -147,16 +147,14 @@ export function SettingsPanel({ settings, onSaved }: Props) {
             day, then increase slowly. Sudden volume spikes hurt trust.
           </li>
           <li>
-            <strong>One account per client — seriously</strong> — if Joana gets
-            six similar emails from six Gmail addresses, she will know. The app
-            warns when another sender already contacted the same client. Each
-            account has a different voice, font, and subject vocabulary by
-            design.
+            <strong>Distinct senders</strong> — each account has its own voice,
+            font, subject vocabulary, and body structure (formal proposal vs
+            casual note vs P.E. engineering).
           </li>
           <li>
-            <strong>Distinct senders</strong> — David writes formal proposals,
-            Daniel is brief and casual, Robert is P.E.-only engineering. They
-            should not feel interchangeable.
+            <strong>Duplicate warning</strong> — the app only warns when the
+            same account emails the same client again within your configured
+            window.
           </li>
           <li>
             <strong>Ask recipients to reply</strong> — a reply strongly signals

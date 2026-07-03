@@ -23,11 +23,3 @@ export type DuplicateWarning = {
   lastSend: HistoryEntry;
   timeAgo: string;
 };
-
-export type CrossAccountWarning = {
-  otherSends: Array<{
-    accountName: string;
-    subject: string;
-    timeAgo: string;
-  }>;
-};
